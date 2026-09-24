@@ -27,7 +27,7 @@ const RESTITUTION = 0.3;
 export const STICK_K = 1800;
 /** Roche limit factor for a fluid satellite: 2.44 · R · (ρ_planet / ρ_satellite)^⅓, with similar densities. */
 const ROCHE = 2.44;
-const THETA = Number((globalThis as { process?: { env: Record<string, string | undefined> } }).process?.env?.THETA ?? 0.6);
+const THETA = 0.6;
 
 export interface FragmentState {
   n: number;
@@ -290,8 +290,7 @@ export class Fragments {
       }
       dt = Math.min(dt, 0.02 * tau, (0.3 * Math.max(s.r[i], g)) / Math.max(1, vr));
     }
-    const cap = Number((globalThis as { process?: { env: Record<string, string | undefined> } }).process?.env?.FRAGDT_CAP ?? Infinity);
-    return Math.max(1, Math.min(dt, cap));
+    return Math.max(1, dt);
   }
 
   /** Distance from each fragment's edge to the nearest other fragment's edge. */
