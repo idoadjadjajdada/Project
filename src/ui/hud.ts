@@ -104,7 +104,8 @@ export class Hud {
     $<HTMLInputElement>("#spawnMass").addEventListener("change", e => {
       const input = e.target as HTMLInputElement;
       const v = parseFloat(input.value.replace(/[×x]10\^?/, "e"));
-      if (!(v > 0) || !this.state.placeType) { this.setPlace(this.state.placeType!); return; }
+      if (!this.state.placeType) return;
+      if (!(v > 0)) { this.setPlace(this.state.placeType); return; }
       const unit = TYPES[this.state.placeType].unit === "M☉" ? M_SUN : M_EARTH;
       this.state.placeMass = v * unit;
     });
@@ -177,6 +178,12 @@ export class Hud {
     const toRate = (v: number) => Math.pow(MAX_RATE, v / 1000);
     const toSlider = (r: number) => Math.round((Math.log(r) / Math.log(MAX_RATE)) * 1000);
     speed.value = String(toSlider(this.state.rate));
+    // The slider is logarithmic: put each tick label where that rate actually sits.
+    $$<HTMLElement>(".ticks [data-rate]").forEach(el => {
+      const pct = toSlider(+el.dataset.rate!) / 10;
+      el.style.left = `${pct}%`;
+      el.style.transform = `translateX(-${pct}%)`;
+    });
     const show = () => { if (!this.state.paused) $("#speedOut").textContent = fmt.rate(this.state.rate); };
     speed.addEventListener("input", () => { this.state.rate = toRate(+speed.value); show(); });
     const nudge = (f: number) => {

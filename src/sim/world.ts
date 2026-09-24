@@ -36,6 +36,7 @@ interface Snapshot {
   bodies: Body[];
   debris: DebrisSet;
   frags: Fragments;
+  impactUntil: number;
 }
 
 export interface SerializedWorld {
@@ -46,6 +47,8 @@ export interface SerializedWorld {
   debris: { x: number[]; y: number[]; vx: number[]; vy: number[]; color: number[]; host: number[] };
   /** Per fragment: x, y, vx, vy, m, r, T, promote, src, NMAT histogram values, density. */
   frags?: number[][];
+  /** Sim time until which an impact was still playing out when saved. */
+  impactUntil?: number;
 }
 
 /** Attract tool's pull, in sim-time units. */
@@ -416,7 +419,8 @@ export class World {
     for (let i = d.count - 1; i >= 0; i--) {
       if (d.host[i]) {
         const host = byId.get(d.host[i]);
-        if (!host) { d.host[i] = 0; continue; }
+        // No host to be relative to: the particle's coordinates mean nothing, so drop it.
+        if (!host) { this.removeDebris(i); continue; }
         const next = propagateKepler(G * host.m, d.x[i], d.y[i], d.vx[i], d.vy[i], h);
         if (next) {
           [d.x[i], d.y[i], d.vx[i], d.vy[i]] = next;
@@ -1067,7 +1071,7 @@ export class World {
       if (t <= 0) continue;
       const perp = Math.abs(px * uy - py * ux);
       const rr = Math.max(b.r, tolerance);
-      if (perp < rr && t < bestT) { bestT = t - Math.sqrt(Math.max(0, rr * rr - perp * perp)); best = b; }
+      if (perp < rr && t < bestT) { bestT = Math.max(0, t - Math.sqrt(Math.max(0, rr * rr - perp * perp))); best = b; }
     }
     if (!best) return null;
     const hx = x0 + ux * bestT, hy = y0 + uy * bestT;
@@ -1116,7 +1120,7 @@ export class World {
   // ---------- Undo & saves ----------
 
   pushUndo(): void {
-    this.undoStack.push({ t: this.t, nextId: this.nextId, bodies: this.bodies.map(cloneBody), debris: cloneDebris(this.debris), frags: this.frags.clone() });
+    this.undoStack.push({ t: this.t, nextId: this.nextId, bodies: this.bodies.map(cloneBody), debris: cloneDebris(this.debris), frags: this.frags.clone(), impactUntil: this.impactUntil });
     if (this.undoStack.length > UNDO_DEPTH) this.undoStack.shift();
   }
 
@@ -1125,6 +1129,7 @@ export class World {
     if (!s) return false;
     this.t = s.t; this.nextId = s.nextId;
     this.bodies = s.bodies; this.debris = s.debris;
+    this.impactUntil = s.impactUntil;
     const cap = this.frags.cap;
     this.frags = s.frags;
     this.frags.setCap(cap);
@@ -1141,7 +1146,7 @@ export class World {
   serialize(): SerializedWorld {
     const d = this.debris, n = d.count;
     return {
-      v: 1, t: this.t, nextId: this.nextId,
+      v: 1, t: this.t, nextId: this.nextId, impactUntil: this.impactUntil,
       bodies: this.bodies.map(b => ({ ...b, surface: b.surface ? toB64(b.surface) : null, under: b.under ? toB64(b.under) : null })),
       frags: Array.from({ length: this.frags.n }, (_, i) => {
         const f = this.frags.s;
@@ -1158,6 +1163,7 @@ export class World {
   load(s: SerializedWorld): void {
     this.clear();
     this.t = s.t; this.nextId = s.nextId;
+    this.impactUntil = s.impactUntil ?? -1;
     this.bodies = s.bodies.map(b => ({
       ...b, surface: b.surface ? fromB64(b.surface) : null, under: b.under ? fromB64(b.under) : null,
       heat: b.heat ?? 0, surfaceRev: 1,

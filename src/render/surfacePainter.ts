@@ -43,7 +43,9 @@ export function paintPixelGlobe(canvas: HTMLCanvasElement, surface: Uint8Array, 
       const z = Math.sqrt(1 - r2);
       const lat = Math.asin(-y);
       const row = Math.min(SURF_H - 1, Math.max(0, Math.floor((lat / Math.PI + 0.5) * SURF_H)));
-      let lon = (Math.atan2(x, z) + rotation) / twoPi;
+      // Same sign convention as World.surfacePoint: longitude = facing angle − rotation,
+      // so an impact patch stays put on the globe and prograde spin turns west to east.
+      let lon = (Math.atan2(x, z) - rotation) / twoPi;
       lon -= Math.floor(lon);
       const mat = surface[row * SURF_W + Math.floor(lon * SURF_W)];
       const c = palette[mat] ?? palette[0];

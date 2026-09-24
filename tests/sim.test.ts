@@ -165,6 +165,43 @@ describe("tools", () => {
     expect(w2.bodies.map(b => b.name)).toEqual(["Sun", "Earth"]);
     expect(w2.bodies[1].surface).toEqual(w.bodies[1].surface);
   });
+
+  it("undo and load keep an impact in progress from settling at once", () => {
+    const { w, earth } = sunEarth();
+    w.pushUndo();
+    w.explode(earth.id);
+    expect(w.impactUntil).toBeGreaterThan(w.t);
+    const mid = w.frags.clone();
+    w.pushUndo();
+    for (let k = 0; k < 3; k++) w.step(300, 1e9);
+    w.undo();
+    expect(w.frags.n).toBe(mid.n);
+    expect(w.impactUntil).toBeGreaterThan(w.t);
+    const s = JSON.parse(JSON.stringify(w.serialize()));
+    const w2 = new World();
+    w2.load(s);
+    expect(w2.impactUntil).toBe(w.impactUntil);
+    w2.step(1, 1e9);
+    expect(w2.frags.n).toBe(mid.n); // still playing out, not folded into moons/debris
+  });
+
+  it("laser never reports a hit behind the beam's origin", () => {
+    const { w, earth } = sunEarth();
+    // Origin inside the tolerance-widened disc, firing toward the centre.
+    const x0 = earth.x - earth.r * 0.5;
+    const hit = w.laser(x0, earth.y, 1, 0, 1 / 60, earth.r * 2)!;
+    expect(hit.id).toBe(earth.id);
+    expect(hit.x).toBeGreaterThanOrEqual(x0);
+  });
+
+  it("drops ring particles whose host no longer exists", () => {
+    const { w, earth } = sunEarth();
+    w.addDebris(earth.x + 1e7, earth.y, earth.vx, earth.vy + 6000, 0xffffff, earth.id);
+    // Remove the host behind the particle's back (undo/load can leave stale host ids in a save).
+    w.bodies.splice(w.bodies.indexOf(earth), 1);
+    w.step(60, 1e9);
+    expect(w.debris.count).toBe(0);
+  });
 });
 
 describe("habitability", () => {

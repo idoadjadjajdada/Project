@@ -180,7 +180,7 @@
     <button class="icon-btn" id="slower" aria-label="Half speed" title="Half speed ( [ )"><svg class="ico"><use href="#i-slower"/></svg></button>
     <label class="speed">
       <input id="speed" type="range" min="0" max="1000" step="1" aria-label="Time warp">
-      <span class="ticks" aria-hidden="true"><span>1s</span><span>1h</span><span>1d</span><span>1y</span><span>10y</span></span>
+      <span class="ticks" aria-hidden="true"><span data-rate="1">1s</span><span data-rate="3600">1h</span><span data-rate="86400">1d</span><span data-rate="31557600">1y</span><span data-rate="315576000">10y</span></span>
     </label>
     <button class="icon-btn" id="faster" aria-label="Double speed" title="Double speed ( ] )"><svg class="ico"><use href="#i-faster"/></svg></button>
     <div class="readout-wrap"><output class="readout num" id="speedOut">1.0 day/s</output><span class="limited label" id="limited" hidden title="The simulation can't keep up with this time warp; it's running as fast as it can.">Limited</span></div>

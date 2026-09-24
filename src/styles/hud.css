@@ -113,7 +113,8 @@
   .timebar { grid-area: time; display: flex; align-items: center; gap: var(--gap); padding: 0 8px; position: relative; }
   .speed { flex: 1 1 auto; min-width: 96px; max-width: 256px; display: grid; gap: 4px; }
   .speed input { width: 100%; margin: 0; accent-color: var(--accent-time); }
-  .speed .ticks { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); }
+  .speed .ticks { position: relative; height: 14px; font-size: 12px; line-height: 14px; color: var(--text-secondary); }
+  .speed .ticks span { position: absolute; top: 0; white-space: nowrap; }
   .readout { min-width: 88px; text-align: right; font-size: 16px; color: var(--accent-time); white-space: nowrap; }
   .preset-btn {
     display: inline-flex; align-items: center; gap: var(--gap); height: 40px; padding: 0 8px;
