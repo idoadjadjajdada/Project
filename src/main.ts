@@ -113,7 +113,7 @@ async function start() {
   requestAnimationFrame(frame);
 
   // Test hook for the browser checks; dev builds only.
-  if (import.meta.env.DEV) Object.assign(window, { __orbital: { sim, cam, hud, renderer } });
+  if (import.meta.env.DEV) Object.assign(window, { __orbital: { sim, cam, hud, renderer, input } });
 
   // PRD: no onboarding; drop straight into the real Solar System.
   hud.setTool("select");

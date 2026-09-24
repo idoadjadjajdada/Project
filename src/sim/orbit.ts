@@ -16,6 +16,22 @@ export function strongestAttractor(bodies: readonly Body[], x: number, y: number
 }
 
 /**
+ * The body whose sphere of influence (Hill sphere) contains point (x, y), picking the
+ * innermost one: near Earth that's Earth, not the Sun, even where the Sun pulls harder.
+ */
+export function dominantBody(bodies: readonly Body[], x: number, y: number): Body | null {
+  let best: Body | null = null, bestR = Infinity;
+  for (const p of bodies) {
+    if (p.type === "spacecraft" || p.m <= 0) continue;
+    const q = parentOf(bodies, p);
+    let hill = Infinity;
+    if (q && q.m > p.m) hill = Math.hypot(p.x - q.x, p.y - q.y) * Math.cbrt(p.m / (3 * q.m));
+    if (Math.hypot(x - p.x, y - p.y) < hill && hill < bestR) { bestR = hill; best = p; }
+  }
+  return best ?? strongestAttractor(bodies, x, y);
+}
+
+/**
  * The parent a body orbits: the heaviest body whose Hill-sphere-like region contains it.
  * Falls back to the strongest attractor. Using acceleration alone makes moons flip to
  * the Sun whenever they pass the far side of their planet, so bodies that are bound

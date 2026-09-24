@@ -24,7 +24,7 @@ export interface Pt { ref: number; dx: number; dy: number }
 export type ToWorker =
   | { type: "tick"; realDt: number; rate: number; laser?: { from: Pt; to: Pt; tol: number } }
   | { type: "preset"; id: PresetId }
-  | { type: "place"; body: BodyType; m: number; at: Pt; launch?: { dx: number; dy: number } }
+  | { type: "place"; body: BodyType; m: number; at: Pt; /** Launch velocity relative to the local parent, m/s. */ launch?: { vx: number; vy: number } }
   | { type: "grab"; id: number; at: Pt }
   | { type: "grabMove"; at: Pt }
   | { type: "grabEnd"; vx: number; vy: number }

@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 import { fragmentColor } from "./fragments";
-import { circularVelocity, strongestAttractor } from "./orbit";
+import { circularVelocity, dominantBody } from "./orbit";
 import { loadPreset } from "./presets";
 import { STRIDE, type BodyMeta, type FromWorker, type Pt, type StateMsg, type ToWorker } from "./protocol";
 import { World } from "./world";
@@ -95,17 +95,13 @@ self.onmessage = (e: MessageEvent<ToWorker>) => {
     }
     case "place": {
       const [px, py] = resolve(m.at);
-      const p = strongestAttractor(world.bodies, px, py);
+      const p = dominantBody(world.bodies, px, py);
       let vx = 0, vy = 0;
       if (p) {
-        [vx, vy] = circularVelocity(p, px, py, 1, m.m);
-        if (m.launch) {
-          // Drag sets the velocity relative to the parent, scaled by the local circular speed.
-          const vc = Math.hypot(vx - p.vx, vy - p.vy);
-          vx = p.vx + m.launch.dx * vc;
-          vy = p.vy + m.launch.dy * vc;
-        }
-      }
+        // Tap: circular orbit. Drag: thrown at the drawn velocity, relative to the local parent.
+        if (m.launch) { vx = p.vx + m.launch.vx; vy = p.vy + m.launch.vy; }
+        else [vx, vy] = circularVelocity(p, px, py, 1, m.m);
+      } else if (m.launch) { vx = m.launch.vx; vy = m.launch.vy; }
       const b = world.add({ type: m.body, m: m.m, x: px, y: py, vx, vy });
       if (!b) post({ type: "notice", text: "The sandbox is full (200 bodies). Erase something first." });
       break;

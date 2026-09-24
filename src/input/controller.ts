@@ -1,5 +1,6 @@
 import { TYPES } from "../sim/catalog";
-import { parentOf, strongestAttractor } from "../sim/orbit";
+import { G } from "../sim/constants";
+import { dominantBody, parentOf, propagateKepler, strongestAttractor } from "../sim/orbit";
 import type { Pt } from "../sim/protocol";
 import type { Body } from "../sim/types";
 import type { Camera } from "../render/camera";
@@ -14,6 +15,8 @@ const TWO_TAP_MS = 250;
 const ERASE_BRUSH = 32;      // px
 const ATTRACT_BRUSH = 90;    // px
 const LASER_ARM = 12;        // px of swipe before the laser fires
+/** Drag-to-launch: this many px of arrow = local circular-orbit speed. */
+const LAUNCH_PX = 100;
 
 /** Safari's trackpad pinch event (not in the DOM typings). */
 interface GestureEvent extends UIEvent { scale: number; clientX: number; clientY: number }
@@ -315,14 +318,58 @@ export class InputController {
       case "place": {
         const s = this.hud.state;
         if (!s.placeType) break;
-        // Launch speed: 100 px of drag = the local circular orbit speed.
-        const dx = p.x - p.x0, dy = p.y - p.y0;
-        const launch = tapped ? undefined : { dx: dx / 100, dy: -dy / 100 };
+        const launch = tapped ? undefined : this.launchVelocity(p);
         this.sim.send({ type: "place", body: s.placeType, m: s.placeMass, at: this.anchor(p.x0, p.y0), launch });
         break;
       }
     }
     this.endEffects(st, false);
+  }
+
+  /**
+   * Launch velocity for a drag, relative to the body whose sphere of influence the drop point
+   * is in: LAUNCH_PX of arrow is that body's circular-orbit speed there, so a sideways drag of
+   * about that length makes a near-circular orbit at any zoom.
+   */
+  private launchVelocity(p: Ptr): { vx: number; vy: number } {
+    const wx = this.cam.wx(p.x0), wy = this.cam.wy(p.y0);
+    const par = dominantBody(this.sim.bodies, wx, wy);
+    const r = par ? Math.hypot(wx - par.x, wy - par.y) : 0;
+    const vc = par && r > 0 ? Math.sqrt((G * par.m) / r) : 0;
+    const k = vc / LAUNCH_PX;
+    return { vx: (p.x - p.x0) * k, vy: -(p.y - p.y0) * k };
+  }
+
+  /** Predicted path of a launch around its parent, in screen px, for the drag preview. */
+  private launchPath(p: Ptr): { x: number; y: number }[] {
+    const wx = this.cam.wx(p.x0), wy = this.cam.wy(p.y0);
+    const par = dominantBody(this.sim.bodies, wx, wy);
+    const v = this.launchVelocity(p);
+    const pts: { x: number; y: number }[] = [];
+    if (!par) return pts;
+    const mu = G * par.m, rx = wx - par.x, ry = wy - par.y;
+    const r = Math.hypot(rx, ry), v2 = v.vx * v.vx + v.vy * v.vy;
+    const energy = v2 / 2 - mu / r;
+    // One orbit if bound, else long enough to leave the screen.
+    const span = energy < 0 ? 2 * Math.PI * Math.sqrt((-mu / (2 * energy)) ** 3 / mu) : (3 * Math.hypot(this.cam.w, this.cam.h) * this.cam.mpp) / Math.max(1, Math.sqrt(v2));
+    const N = 96;
+    let sx = rx, sy = ry, svx = v.vx, svy = v.vy;
+    const h = span / N;
+    for (let i = 0; i <= N; i++) {
+      pts.push({ x: this.cam.sx(par.x + sx), y: this.cam.sy(par.y + sy) });
+      if (Math.hypot(sx, sy) < par.r) break; // hits the parent
+      const next = propagateKepler(mu, sx, sy, svx, svy, h);
+      if (next) { [sx, sy, svx, svy] = next; continue; }
+      // Unbound: a few leapfrog substeps.
+      for (let k = 0; k < 8; k++) {
+        const hh = h / 8, d = Math.hypot(sx, sy), a = -mu / (d * d * d);
+        svx += a * sx * hh / 2; svy += a * sy * hh / 2;
+        sx += svx * hh; sy += svy * hh;
+        const d2 = Math.hypot(sx, sy), a2 = -mu / (d2 * d2 * d2);
+        svx += a2 * sx * hh / 2; svy += a2 * sy * hh / 2;
+      }
+    }
+    return pts;
   }
 
   /** Release whatever a stroke left running in the sim. */
@@ -374,7 +421,7 @@ export class InputController {
     o.laser = null; o.sling = null; o.ghost = null;
     if (s.placeType && at) {
       o.ghost = { x: p ? p.x0 : at.x, y: p ? p.y0 : at.y, color: TYPES[s.placeType].color };
-      if (p && Math.hypot(p.x - p.x0, p.y - p.y0) > TAP_MOVE) o.sling = { x0: p.x0, y0: p.y0, x1: p.x, y1: p.y };
+      if (p && Math.hypot(p.x - p.x0, p.y - p.y0) > TAP_MOVE) o.sling = { x0: p.x0, y0: p.y0, x1: p.x, y1: p.y, path: this.launchPath(p) };
     }
     const st = this.stroke;
     if (!st || !p) return undefined;

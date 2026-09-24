@@ -24,7 +24,7 @@ export interface Overlay {
   brushPx: number;
   brushColor: number | null;
   laser: { x0: number; y0: number; x1: number; y1: number } | null;
-  sling: { x0: number; y0: number; x1: number; y1: number } | null;
+  sling: { x0: number; y0: number; x1: number; y1: number; path: { x: number; y: number }[] } | null;
   ghost: { x: number; y: number; color: number } | null;
 }
 
@@ -456,7 +456,19 @@ export class Renderer {
     }
     if (o.ghost) g.circle(snap(o.ghost.x), snap(o.ghost.y), PX * 2).fill({ color: o.ghost.color, alpha: 0.7 }).stroke({ width: LINE, color: SELECT });
     if (o.sling) {
-      const { x0, y0, x1, y1 } = o.sling;
+      const { x0, y0, x1, y1, path } = o.sling;
+      // Predicted path as a row of art pixels, one every few pixels along the curve.
+      let carry = 0;
+      for (let i = 0; i + 1 < path.length; i++) {
+        const a = path[i], b = path[i + 1], seg = Math.hypot(b.x - a.x, b.y - a.y);
+        let t = carry;
+        for (; t < seg; t += PX * 3) {
+          const x = a.x + ((b.x - a.x) * t) / seg, y = a.y + ((b.y - a.y) * t) / seg;
+          if (x > -PX && y > -PX && x < this.app.screen.width + PX && y < this.app.screen.height + PX) g.rect(snap(x), snap(y), PX, PX);
+        }
+        carry = t - seg;
+      }
+      g.fill({ color: SELECT, alpha: 0.6 });
       const dx = x1 - x0, dy = y1 - y0, L = Math.hypot(dx, dy) || 1;
       g.moveTo(x0, y0).lineTo(x1, y1).stroke({ width: LINE, color: SELECT });
       const ux = dx / L, uy = dy / L;
