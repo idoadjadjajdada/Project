@@ -3,7 +3,7 @@ import type { BodyType } from "./types";
 import type { SerializedWorld, SimEvent } from "./world";
 
 /** Fields per body in the packed state array. */
-export const STRIDE = 6; // x, y, vx, vy, m, r
+export const STRIDE = 7; // x, y, vx, vy, m, r, heat
 
 export interface BodyMeta {
   id: number;
@@ -40,7 +40,9 @@ export type ToWorker =
   | { type: "snapshot" }
   | { type: "undo" }
   | { type: "save"; slot: number }
-  | { type: "load"; data: SerializedWorld };
+  | { type: "load"; data: SerializedWorld }
+  /** Fragment budget, tied to the Graphics setting (Low 250 / Med 600 / High 1,500). */
+  | { type: "fragCap"; cap: number };
 
 export interface StateMsg {
   type: "state";
@@ -60,6 +62,16 @@ export interface StateMsg {
   events: SimEvent[];
   laserHit: { x: number; y: number; id: number } | null;
   undoDepth: number;
+  fragCount: number;
+  fragXY: Float64Array;
+  /** Collision radius per fragment, m. */
+  fragR: Float32Array;
+  fragColor: Uint32Array;
+  /** 0..1: how molten each fragment is (drives the glow). */
+  fragHeat: Float32Array;
+  /** An impact is still playing out; `impactId` changes with each new one. */
+  impactActive: boolean;
+  impactId: number;
 }
 
 export type FromWorker =

@@ -30,10 +30,11 @@ function patches(weights: [number, number][], seeds: number, rand: () => number)
     const lonScale = Math.max(0.15, Math.cos(lat));
     for (let x = 0; x < SURF_W; x++) {
       let best = Infinity, mat = sm[0];
+      // Jitter the cell position a little so borders look organic (one draw per cell, not per seed).
+      const jx = (rand() - 0.5) * 1.6, jy = (rand() - 0.5) * 1.6;
       for (let i = 0; i < seeds; i++) {
-        // Jitter the distance a little so borders look organic.
-        const dx = lonDist(x + 0.5, sx[i]) * lonScale, dy = y + 0.5 - sy[i];
-        const d = dx * dx + dy * dy + rand() * 3;
+        const dx = lonDist(x + 0.5 + jx, sx[i]) * lonScale, dy = y + 0.5 + jy - sy[i];
+        const d = dx * dx + dy * dy;
         if (d < best) { best = d; mat = sm[i]; }
       }
       out[y * SURF_W + x] = mat;

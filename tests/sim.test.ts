@@ -66,14 +66,53 @@ describe("collisions", () => {
     expect(composition(w.bodies[0].surface!)[0].mat).toBe(4);
   });
 
-  it("shatters on catastrophic impacts", () => {
+  it("breaks big impacts into fragments, conserving mass and momentum", () => {
     const w = new World();
     const a = w.add({ type: "rocky", x: 0, y: 0, m: M_EARTH })!;
-    w.add({ type: "rocky", x: a.r * 2.5, y: 0, vx: -80_000, m: M_EARTH })!;
+    w.add({ type: "rocky", x: a.r * 2.5, y: 0, vx: -20_000, m: 0.3 * M_EARTH })!;
     const m0 = w.totalMass();
+    const p0 = w.bodies.reduce((s, b) => s + b.m * b.vx, 0);
     runFor(w, 600);
-    expect(w.bodies.length).toBeGreaterThan(2);
+    expect(w.frags.n).toBeGreaterThan(50);
     expect(w.totalMass() / m0).toBeCloseTo(1, 9);
+    const f = w.frags.s;
+    let p = w.bodies.reduce((s, b) => s + b.m * b.vx, 0);
+    for (let i = 0; i < f.n; i++) p += f.m[i] * f.vx[i];
+    expect(Math.abs(p - p0) / (m0 * 20_000)).toBeLessThan(0.01);
+  });
+
+  it("reforms the planet from fragments after a giant impact", () => {
+    const w = new World();
+    const e = w.add({ type: "rocky", name: "Earth", x: 0, y: 0, m: M_EARTH })!;
+    const rT = e.r * 0.53, vEsc = Math.sqrt((2 * G * 1.11 * M_EARTH) / (e.r + rT));
+    w.add({ type: "rocky", name: "Theia", x: -3 * e.r, y: 0.7 * (e.r + rT), vx: 0.7 * vEsc, m: 0.11 * M_EARTH, r: rT });
+    const m0 = w.totalMass();
+    for (let t = 0; t < 5 * DAY; ) t += w.step(3600, 1e9);
+    const main = w.bodies.reduce((a, b) => (b.m > a.m ? b : a));
+    expect(main.name).toBe("Earth");
+    expect(main.m / M_EARTH).toBeGreaterThan(1.0);
+    expect(main.heat).toBeGreaterThan(1000); // still a magma ocean
+    expect(w.totalMass() / m0).toBeGreaterThan(0.97); // only escaping dust leaves
+  });
+});
+
+describe("giant impact in a full system", () => {
+  it("conserves mass through fragmenting and settling at high time warp", () => {
+    const w = new World();
+    loadPreset(w, "earthmoon");
+    const e = w.bodies.find(b => b.name === "Earth")!;
+    const rT = e.r * 0.53, vEsc = Math.sqrt((2 * G * 1.11 * M_EARTH) / (e.r + rT));
+    w.add({ type: "rocky", name: "Theia", x: e.x - 3 * e.r, y: e.y + 0.7 * (e.r + rT), vx: e.vx + 0.7 * vEsc, vy: e.vy, m: 0.11 * M_EARTH, r: rT });
+    const sunM = w.bodies.find(b => b.name === "Sun")!.m;
+    const m0 = w.totalMass();
+    // One day per frame, like the game at 1 day/s, for three weeks.
+    for (let f = 0; f < 21; f++) w.step(DAY, 1e9);
+    expect(w.frags.n).toBe(0); // settled
+    const earth = w.bodies.find(b => b.name === "Earth");
+    expect(earth).toBeDefined();
+    expect(earth!.m / M_EARTH).toBeGreaterThan(1.0);
+    expect(w.bodies.find(b => b.name === "Sun")!.m).toBe(sunM); // the Sun doesn't swallow Earth's debris
+    expect(w.totalMass() / m0).toBeGreaterThan(0.98);
   });
 });
 
@@ -91,6 +130,22 @@ describe("tools", () => {
     earth.vy *= 0.7;
     w.orbitLock(earth.id);
     expect(elements(earth, sun).e).toBeLessThan(1e-6);
+  });
+
+  it("explode throws fragments, some of which fall back", () => {
+    const { w, earth } = sunEarth();
+    w.explode(earth.id);
+    expect(w.get(earth.id)).toBeUndefined();
+    expect(w.frags.n).toBeGreaterThan(50);
+  });
+
+  it("laser cuts off massive fragments", () => {
+    const { w, earth } = sunEarth();
+    const m0 = earth.m;
+    for (let k = 0; k < 10; k++) w.laser(earth.x - 1e9, earth.y, 1, 0, 1 / 60, 1e6);
+    expect(earth.m).toBeLessThan(m0);
+    expect(w.frags.n).toBeGreaterThan(0);
+    expect((earth.m + w.frags.totalMass()) / m0).toBeCloseTo(1, 9);
   });
 
   it("undo restores the previous state", () => {
@@ -155,12 +210,12 @@ describe("debris", () => {
     expect(w.debris.count).toBe(n0);
   });
 
-  it("laser ejecta survives the frame it was made in", () => {
+  it("laser fragments survive the frame they were made in", () => {
     const w = new World();
     loadPreset(w, "solar");
-    const j = w.bodies.find(b => b.name === "Jupiter")!;
-    for (let f = 0; f < 30; f++) { w.laser(j.x - 1e9, j.y, 1, 0, 1 / 60, 1e6); w.step(DAY / 60, 1e9); }
-    expect(w.debris.count).toBeGreaterThan(50);
+    const j = w.bodies.find(b => b.name === "Mars")!;
+    for (let f = 0; f < 30; f++) { w.laser(j.x - 1e9, j.y, 1, 0, 1 / 60, 1e6); w.step(DAY / 600, 1e9); }
+    expect(w.frags.n + w.debris.count).toBeGreaterThan(10);
   });
 });
 

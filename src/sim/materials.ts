@@ -22,11 +22,12 @@ export const MATERIALS: Material[] = [
   { name: "Anorthosite", color: 0xb7b4ac },       // 12
   { name: "Plasma", color: 0xffc35a },            // 13
   { name: "Tholin", color: 0xa4785a },            // 14
+  { name: "Magma", color: 0xff6a1a },             // 15: molten surface; cools into what's in `under`
 ];
 
 export const M = {
   silicate: 0, basalt: 1, iron: 2, regolith: 3, water: 4, ice: 5, vegetation: 6,
-  sulfur: 7, carbon: 8, hydrogen: 9, helium: 10, methane: 11, anorthosite: 12, plasma: 13, tholin: 14,
+  sulfur: 7, carbon: 8, hydrogen: 9, helium: 10, methane: 11, anorthosite: 12, plasma: 13, tholin: 14, magma: 15,
 } as const;
 
 export function materialColor(i: number): number {

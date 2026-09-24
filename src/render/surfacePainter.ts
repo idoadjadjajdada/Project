@@ -1,6 +1,7 @@
-import { MATERIALS } from "../sim/materials";
+import { M, MATERIALS } from "../sim/materials";
 import { SURF_H, SURF_W } from "../sim/types";
 
+const MAGMA = M.magma;
 const palette = MATERIALS.map(m => [(m.color >> 16) & 255, (m.color >> 8) & 255, m.color & 255]);
 
 /** The most common material's color, for bodies too small to texture. */
@@ -44,7 +45,15 @@ export function paintPixelGlobe(canvas: HTMLCanvasElement, surface: Uint8Array, 
       const row = Math.min(SURF_H - 1, Math.max(0, Math.floor((lat / Math.PI + 0.5) * SURF_H)));
       let lon = (Math.atan2(x, z) + rotation) / twoPi;
       lon -= Math.floor(lon);
-      const c = palette[surface[row * SURF_W + Math.floor(lon * SURF_W)]] ?? palette[0];
+      const mat = surface[row * SURF_W + Math.floor(lon * SURF_W)];
+      const c = palette[mat] ?? palette[0];
+      if (mat === MAGMA) {
+        // Magma glows on its own, day or night: two bright shades dithered together.
+        const k = BAYER[(py & 3) * 4 + (px & 3)] > 0.5 ? 1.0 : 0.72;
+        img.data[o] = Math.min(255, c[0] * k + 40); img.data[o + 1] = c[1] * k; img.data[o + 2] = c[2] * k;
+        img.data[o + 3] = 255;
+        continue;
+      }
       const lambert = light ? Math.max(0, x * lx + -y * ly + z * lz) : 0.8;
       // Quantize to the shade steps, dithering between neighbours.
       const t = lambert * (SHADES.length - 1);

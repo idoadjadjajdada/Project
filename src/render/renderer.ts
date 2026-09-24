@@ -51,6 +51,10 @@ export class Renderer {
   private trails = new Graphics();
   private guides = new Graphics();
   private debris!: ParticleContainer;
+  /** Fragments smaller than an art pixel. */
+  private fragDots!: ParticleContainer;
+  /** Fragments big enough to draw as discs. */
+  private fragDisks = new Graphics();
   private glows = new Graphics();
   private globes = new Container();
   private dots = new Graphics();
@@ -80,8 +84,9 @@ export class Renderer {
     host.appendChild(this.app.canvas);
     this.pixTex = pixelTexture();
     this.debris = new ParticleContainer({ dynamicProperties: { position: true, color: true, vertex: false, rotation: false, uvs: false } });
+    this.fragDots = new ParticleContainer({ dynamicProperties: { position: true, color: true, vertex: false, rotation: false, uvs: false } });
     this.world.scale.set(1 / PX);
-    this.world.addChild(this.stars, this.trails, this.guides, this.debris, this.glows, this.dots, this.globes, this.fx);
+    this.world.addChild(this.stars, this.trails, this.guides, this.debris, this.glows, this.fragDots, this.fragDisks, this.dots, this.globes, this.fx);
     this.rt = RenderTexture.create({ width: 1, height: 1, resolution: 1, antialias: false });
     this.rt.source.scaleMode = "nearest";
     this.screen.texture = this.rt;
@@ -236,9 +241,31 @@ export class Renderer {
       p.tint = sim.debrisColor[i];
     }
 
+    // ---- Fragments: pixel chunks, glowing while molten ----
+    const glows = this.glows.clear();
+    const fd = this.fragDisks.clear();
+    const fparts = this.fragDots.particleChildren as Particle[];
+    let small = 0;
+    for (let i = 0; i < sim.fragCount; i++) {
+      const sx = snap(cam.sx(sim.fragXY[i * 2])), sy = snap(cam.sy(sim.fragXY[i * 2 + 1]));
+      if (sx < -60 || sy < -60 || sx > cam.w + 60 || sy > cam.h + 60) continue;
+      const rpx = sim.fragR[i] / cam.mpp;
+      const heat = sim.fragHeat[i];
+      // A thin molten rim, not a big halo: hundreds of overlapping halos wash out into one blob.
+      if (heat > 0.05) glows.circle(sx, sy, snap(Math.max(PX * 1.5, rpx + PX))).fill({ color: 0xff7a2a, alpha: 0.1 * heat });
+      if (rpx < PX * 0.75) {
+        let p = fparts[small];
+        if (!p) { p = new Particle({ texture: this.pixTex, scaleX: PX, scaleY: PX }); fparts.push(p); }
+        p.x = sx; p.y = sy; p.tint = sim.fragColor[i];
+        small++;
+      } else {
+        fd.circle(sx, sy, snap(rpx * 2) / 2).fill(sim.fragColor[i]);
+      }
+    }
+    if (fparts.length !== small) { fparts.length = small; this.fragDots.update(); }
+
     // ---- Bodies ----
     const dots = this.dots.clear();
-    const glows = this.glows.clear();
     const usedGlobes = new Set<number>();
     const lumBodies = bodies.filter(b => luminosityFor(b.type, b.m) > 0);
     for (const d of shown) {
@@ -271,6 +298,11 @@ export class Renderer {
       if (b.type === "spacecraft") {
         dots.rect(sx - PX, sy - PX, PX * 2, PX * 2).fill(INK);
         continue;
+      }
+      // Molten planets glow: a halo that fades as the magma ocean crusts over.
+      if (b.heat > 300) {
+        const k = Math.min(1, (b.heat - 300) / 2500);
+        glows.circle(sx, sy, snap(rpx * 1.35 + PX * 2)).fill({ color: 0xff6a1a, alpha: 0.12 + 0.2 * k });
       }
       // Planets get a pixel globe once they're 4+ art pixels across; smaller ones are a flat dot.
       if (b.surface && rpx * 2 >= PX * 4) {

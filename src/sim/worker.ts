@@ -1,4 +1,5 @@
 /// <reference lib="webworker" />
+import { fragmentColor } from "./fragments";
 import { circularVelocity, strongestAttractor } from "./orbit";
 import { loadPreset } from "./presets";
 import { STRIDE, type BodyMeta, type FromWorker, type Pt, type StateMsg, type ToWorker } from "./protocol";
@@ -30,7 +31,7 @@ function sendState() {
   for (let i = 0; i < n; i++) {
     const b = bs[i], o = i * STRIDE;
     ids[i] = b.id;
-    data[o] = b.x; data[o + 1] = b.y; data[o + 2] = b.vx; data[o + 3] = b.vy; data[o + 4] = b.m; data[o + 5] = b.r;
+    data[o] = b.x; data[o + 1] = b.y; data[o + 2] = b.vx; data[o + 3] = b.vy; data[o + 4] = b.m; data[o + 5] = b.r; data[o + 6] = b.heat;
   }
   let meta: BodyMeta[] | undefined;
   if (world.topologyRev !== sentTopology || lastRenamed) {
@@ -53,11 +54,21 @@ function sendState() {
     const [x, y] = world.debrisPos(i, byId);
     debrisXY[i * 2] = x; debrisXY[i * 2 + 1] = y;
   }
+  const fs = world.frags.s, fc = fs.n;
+  const fragXY = new Float64Array(fc * 2), fragR = new Float32Array(fc), fragColor = new Uint32Array(fc), fragHeat = new Float32Array(fc);
+  for (let i = 0; i < fc; i++) {
+    fragXY[i * 2] = fs.x[i]; fragXY[i * 2 + 1] = fs.y[i];
+    fragR[i] = fs.r[i];
+    fragColor[i] = fragmentColor(world.frags.material(i), fs.T[i]);
+    fragHeat[i] = Math.min(1, Math.max(0, (fs.T[i] - 900) / 1800));
+  }
   const msg: StateMsg = {
     type: "state", epoch, t: world.t, limited: world.limited, ids, bodies: data, meta, surfaces,
     debrisCount: dc, debrisXY, debrisColor, events: world.events.splice(0), laserHit, undoDepth: world.undoDepth,
+    fragCount: fc, fragXY, fragR, fragColor, fragHeat,
+    impactActive: world.frags.n > 0 && world.t < world.impactUntil, impactId: world.impactId,
   };
-  post(msg, [ids.buffer, data.buffer, debrisXY.buffer, debrisColor.buffer, ...surfaces.map(s => s.data.buffer)]);
+  post(msg, [ids.buffer, data.buffer, debrisXY.buffer, debrisColor.buffer, fragXY.buffer, fragR.buffer, fragColor.buffer, fragHeat.buffer, ...surfaces.map(s => s.data.buffer)]);
 }
 
 self.onmessage = (e: MessageEvent<ToWorker>) => {
@@ -132,5 +143,6 @@ self.onmessage = (e: MessageEvent<ToWorker>) => {
       break;
     case "save": post({ type: "saved", slot: m.slot, data: world.serialize() }); break;
     case "load": world.load(m.data); sentSurfaceRev.clear(); epoch++; fieldAt = null; break;
+    case "fragCap": world.setFragmentCap(m.cap); break;
   }
 };

@@ -185,6 +185,9 @@ export class Hud {
       show();
     };
     this.nudge = nudge;
+    this.setRate = (r: number) => { this.state.rate = Math.min(MAX_RATE, Math.max(1, r)); speed.value = String(toSlider(this.state.rate)); show(); };
+    $("#impactSlow").addEventListener("click", () => { sfx.press(); this.setRate(60); this.impactDismissed = this.sim.impactId; });
+    $("#impactDismiss").addEventListener("click", () => { sfx.close(); this.impactDismissed = this.sim.impactId; });
     $("#slower").addEventListener("click", () => { sfx.press(); nudge(0.5); });
     $("#faster").addEventListener("click", () => { sfx.press(); nudge(2); });
     $("#playPause").addEventListener("click", () => this.setPaused(!this.state.paused));
@@ -192,6 +195,8 @@ export class Hud {
   }
 
   nudge: (f: number) => void = () => {};
+  setRate: (r: number) => void = () => {};
+  private impactDismissed = -1;
 
   setPaused(p: boolean): void {
     if (p === this.state.paused) return;
@@ -239,7 +244,9 @@ export class Hud {
   tick(realDt: number): void {
     this.fps = this.fps * 0.95 + (1 / Math.max(1e-3, realDt)) * 0.05;
     $("#statBodies").textContent = fmt.int(this.sim.bodies.length);
-    $("#statDebris").textContent = fmt.int(this.sim.debrisCount);
+    $("#statDebris").textContent = fmt.int(this.sim.debrisCount + this.sim.fragCount);
+    // Suggest slowing down while an impact is playing out faster than the eye can follow.
+    $("#impactSuggest").hidden = !(this.sim.impactActive && !this.state.paused && this.state.rate > 120 && this.impactDismissed !== this.sim.impactId);
     $("#statDate").textContent = fmt.date(EPOCH_MS + this.sim.t * 1000);
     const f = $("#statFps");
     f.textContent = String(Math.round(this.fps));

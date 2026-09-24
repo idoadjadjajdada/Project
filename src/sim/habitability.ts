@@ -25,7 +25,8 @@ export function temperature(bodies: readonly Body[], b: Body): number {
   const S = fluxAt(bodies, b);
   const teq = 278.6 * Math.pow(S, 0.25) * Math.pow(1 - b.albedo, 0.25);
   // Deep space floor: the cosmic microwave background.
-  return Math.max(2.7, teq + (S > 0 ? b.greenhouse : 0));
+  // Leftover impact heat (a magma ocean) adds on top.
+  return Math.max(2.7, teq + (S > 0 ? b.greenhouse : 0)) + b.heat;
 }
 
 export interface Factor { name: string; detail: string; pass: boolean }

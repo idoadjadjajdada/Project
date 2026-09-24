@@ -367,3 +367,10 @@ input, .info-name { -webkit-user-select: text; user-select: text; }
 .stat .v.warn { color: var(--accent-time); }
 .stat .v.bad { color: var(--accent-danger); }
 .slot[disabled] { opacity: .5; cursor: default; }
+
+/* Impact slow-down suggestion (amber = time) */
+.impact-suggest { display: flex; align-items: center; gap: 4px; pointer-events: auto; padding: 4px; border: 1px solid var(--accent-time); border-radius: var(--r-panel); background: var(--bg-base); }
+.impact-suggest[hidden] { display: none; }
+.impact-go { height: 32px; padding: 0 12px; border: 0; border-radius: var(--r-ctl); background: var(--time-wash); color: var(--accent-time); }
+.impact-go:hover { background: rgba(255, 176, 32, .2); }
+.impact-x { width: 32px; height: 32px; }

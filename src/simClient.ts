@@ -16,6 +16,13 @@ export class SimClient {
   debrisCount = 0;
   debrisXY: Float64Array = new Float64Array(0);
   debrisColor: Uint32Array = new Uint32Array(0);
+  fragCount = 0;
+  fragXY: Float64Array = new Float64Array(0);
+  fragR: Float32Array = new Float32Array(0);
+  fragColor: Uint32Array = new Uint32Array(0);
+  fragHeat: Float32Array = new Float32Array(0);
+  impactActive = false;
+  impactId = 0;
   laserHit: { x: number; y: number; id: number } | null = null;
   /** Current world epoch (see StateMsg.epoch). */
   epoch = 0;
@@ -85,12 +92,12 @@ export class SimClient {
       if (!meta) continue;
       let b = this.byId.get(id);
       if (!b) {
-        b = { id, name: meta.name, type: meta.type, x: 0, y: 0, vx: 0, vy: 0, m: 0, r: 0, spin: meta.spin, greenhouse: meta.greenhouse, albedo: meta.albedo, surface: null, surfaceRev: 0, rings: meta.rings };
+        b = { id, name: meta.name, type: meta.type, x: 0, y: 0, vx: 0, vy: 0, m: 0, r: 0, spin: meta.spin, greenhouse: meta.greenhouse, albedo: meta.albedo, surface: null, surfaceRev: 0, heat: 0, under: null, rings: meta.rings };
       }
       b.name = meta.name; b.type = meta.type; b.spin = meta.spin; b.rings = meta.rings;
       b.greenhouse = meta.greenhouse; b.albedo = meta.albedo;
       b.x = s.bodies[o]; b.y = s.bodies[o + 1]; b.vx = s.bodies[o + 2]; b.vy = s.bodies[o + 3];
-      b.m = s.bodies[o + 4]; b.r = s.bodies[o + 5];
+      b.m = s.bodies[o + 4]; b.r = s.bodies[o + 5]; b.heat = s.bodies[o + 6];
       if (meta.type === "blackhole" && b.surface) { b.surface = null; b.surfaceRev++; }
       next.push(b);
       nextById.set(id, b);
@@ -104,6 +111,9 @@ export class SimClient {
     this.debrisCount = s.debrisCount;
     this.debrisXY = s.debrisXY;
     this.debrisColor = s.debrisColor;
+    this.fragCount = s.fragCount; this.fragXY = s.fragXY; this.fragR = s.fragR;
+    this.fragColor = s.fragColor; this.fragHeat = s.fragHeat;
+    this.impactActive = s.impactActive; this.impactId = s.impactId;
     if (s.events.length) this.onEvents(s.events);
   }
 }

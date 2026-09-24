@@ -60,6 +60,11 @@ async function start() {
 
   const input = new InputController(worldEl, cam, sim, renderer, hud);
 
+  // Fragment budget follows the Graphics setting.
+  const FRAG_CAP = { low: 250, med: 600, high: 1500 } as const;
+  sim.send({ type: "fragCap", cap: FRAG_CAP[settings.get().quality] });
+  settings.subscribe(s => sim.send({ type: "fragCap", cap: FRAG_CAP[s.quality] }));
+
   // ---------- Keyboard (PRD v1 set: 1–8, Space, [ ], Esc; plus Ctrl/Cmd+Z) ----------
   document.addEventListener("keydown", e => {
     const t = e.target as HTMLElement;
@@ -72,6 +77,9 @@ async function start() {
     else if (e.key === "]") hud.nudge(2);
     else if (e.key === "Escape") { hud.closePresets(); hud.select(null); }
   });
+
+  /** Name of the followed body, so the camera can pick up its reformed successor. */
+  let followName: string | null = null;
 
   // ---------- Frame loop ----------
   let last = performance.now();
@@ -86,8 +94,11 @@ async function start() {
       if (b) { cam.frame(b.x, b.y, pendingFocus.span); cam.followId = b.id; pendingFocus = null; }
     }
     if (cam.followId !== null) {
-      const b = sim.byId.get(cam.followId);
-      if (b) { cam.cx = b.x; cam.cy = b.y; } else cam.followId = null;
+      let b = sim.byId.get(cam.followId);
+      // The followed body broke up: stay with whatever reforms under its name.
+      if (!b && followName) b = sim.bodies.find(x => x.name === followName);
+      if (b) { cam.followId = b.id; followName = b.name; cam.cx = b.x; cam.cy = b.y; }
+      else if (!sim.fragCount) cam.followId = null; // nothing left to wait for
     }
 
     const laser = input.frame();

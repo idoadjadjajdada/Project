@@ -26,6 +26,12 @@ export interface Body {
   surface: Uint8Array | null;
   /** Bumped whenever `surface` changes so the renderer rebuilds its texture. */
   surfaceRev: number;
+  /** Kelvin above equilibrium left over from impacts; decays as the body cools. */
+  heat: number;
+  /** For magma cells: the material the cell turns into once it cools. */
+  under: Uint8Array | null;
+  /** Sim time until which this body (reformed during an impact) merges on contact instead of breaking again. */
+  settleUntil?: number;
   /** Planetary rings drawn around the body, in metres (Saturn preset). */
   rings?: [number, number];
 }
