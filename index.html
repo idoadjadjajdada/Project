@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0A0E17">
+  <title>Orbital</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700&family=Share+Tech+Mono&display=swap">
+</head>
+<body>
+<svg class="sprite" aria-hidden="true" focusable="false">
+  <!-- Tools -->
+  <symbol id="i-select" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 8.5v-3A1.5 1.5 0 0 1 5.5 4h3"/><path d="M15.5 4h3A1.5 1.5 0 0 1 20 5.5v3"/><path d="M20 15.5v3a1.5 1.5 0 0 1-1.5 1.5h-3"/><path d="M8.5 20h-3A1.5 1.5 0 0 1 4 18.5v-3"/>
+    <ellipse cx="12" cy="12" rx="5.4" ry="2.3" transform="rotate(-28 12 12)" style="stroke:var(--ico-accent)"/>
+    <circle cx="12" cy="12" r="1.8" style="fill:var(--ico-accent);stroke:none"/>
+  </symbol>
+  <symbol id="i-grab" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M8 13V6.5a1.5 1.5 0 0 1 3 0V11"/><path d="M11 10.5V5a1.5 1.5 0 0 1 3 0v5.5"/><path d="M14 10.5V6a1.5 1.5 0 0 1 3 0v5"/>
+    <path d="M17 10a1.5 1.5 0 0 1 3 0v4a7 7 0 0 1-7 7h-1.3a6 6 0 0 1-4.9-2.6L3.9 15a1.5 1.5 0 0 1 2.4-1.8L8 15"/>
+    <circle cx="4.5" cy="6" r="2" style="fill:var(--ico-accent);stroke:none"/>
+  </symbol>
+  <symbol id="i-erase" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M14.1 3.8a1.5 1.5 0 0 1 2.1 0l4 4a1.5 1.5 0 0 1 0 2.1L11 19.1a3 3 0 0 1-2.1.9H7.1a3 3 0 0 1-2.1-.9l-1-1a1.5 1.5 0 0 1 0-2.1z"/>
+    <path d="M8.8 9.1l6.1 6.1" style="stroke:var(--ico-accent)"/><path d="M13 20.5h7"/>
+  </symbol>
+  <symbol id="i-attract" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 9h4v4a3 3 0 0 0 6 0V9h4v4a7 7 0 0 1-14 0z"/>
+    <path d="M5 12h4M15 12h4" style="stroke:var(--ico-accent)"/>
+    <circle cx="12" cy="3.2" r="1.3" fill="currentColor" stroke="none"/><path d="M12 5.6v1.6" style="stroke:var(--ico-accent)"/>
+  </symbol>
+  <symbol id="i-orbitlock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <ellipse cx="12" cy="15" rx="9.5" ry="5"/>
+    <circle cx="12" cy="15" r="1.8" fill="currentColor" stroke="none"/>
+    <path d="M12 1.8a3 3 0 0 0-3 3c0 2.3 3 5.2 3 5.2s3-2.9 3-5.2a3 3 0 0 0-3-3z" style="stroke:var(--ico-accent)"/>
+    <circle cx="12" cy="4.8" r="1" style="fill:var(--ico-accent);stroke:none"/>
+  </symbol>
+  <symbol id="i-laser" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="6" cy="18" r="2.4"/><circle cx="6" cy="18" r=".6" fill="currentColor"/>
+    <path d="M8 16L17.4 6.6" stroke-width="2" style="stroke:var(--ico-accent)"/>
+    <path d="M18.2 1.8v2"/><path d="M22.2 5.8h-2"/><path d="M21.2 2.8l-1.3 1.3"/><path d="M21.2 8.8l-1.3-1.3"/><path d="M15.2 2.8l1.3 1.3"/>
+  </symbol>
+  <symbol id="i-collapse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 4l5 5M9 5.2V9H5.2"/><path d="M20 4l-5 5M15 5.2V9h3.8"/>
+    <path d="M4 20l5-5M5.2 15H9v3.8"/><path d="M20 20l-5-5M18.8 15H15v3.8"/>
+    <circle cx="12" cy="12" r="1.7" style="fill:var(--ico-accent);stroke:none"/>
+  </symbol>
+  <symbol id="i-explode" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12l-5.3 1.5 2.7 4.9-4.9-2.7L12 21l-1.5-5.3-4.9 2.7 2.7-4.9L3 12l5.3-1.5-2.7-4.9 4.9 2.7L12 3l1.5 5.3 4.9-2.7-2.7 4.9z"/>
+    <circle cx="12" cy="12" r="2" style="fill:var(--ico-accent);stroke:none"/>
+  </symbol>
+
+  <!-- UI -->
+  <symbol id="i-logo" viewBox="0 0 24 24" fill="none" stroke-width="1.5">
+    <ellipse cx="12" cy="12" rx="10.5" ry="4.2" transform="rotate(-24 12 12)" stroke="#00F0FF"/>
+    <circle cx="12" cy="12" r="3.6" stroke="#E2E8F0"/>
+    <circle cx="20.6" cy="7.6" r="1.6" fill="#E2E8F0"/>
+  </symbol>
+  <symbol id="i-undo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 9.5A8 8 0 1 1 6.2 17.6"/><path d="M4.3 4.6v4.9h4.9"/>
+    <circle cx="12" cy="12" r="1.8" style="fill:var(--ico-accent);stroke:none"/>
+  </symbol>
+  <symbol id="i-pencil" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M8.4 18.8L19 8.2a2 2 0 0 0 0-2.9l-.3-.3a2 2 0 0 0-2.9 0L5.2 15.6"/><path d="M14.2 6.6l3.2 3.2"/>
+    <path d="M4 20l1.2-4.4 3.2 3.2z" style="fill:var(--ico-accent);stroke:var(--ico-accent)"/>
+  </symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+    <path d="M4 7h16M4 12h10M4 17h16"/><circle cx="18.5" cy="12" r="1.6" style="fill:var(--ico-accent);stroke:none"/>
+  </symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="6.5" y="5" width="3.6" height="14" rx="1"/><rect x="13.9" y="5" width="3.6" height="14" rx="1"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.6c0-.8.9-1.3 1.6-.9l9.2 5.9c.6.4.6 1.3 0 1.7l-9.2 5.9c-.7.4-1.6-.1-1.6-.9z"/></symbol>
+  <symbol id="i-slower" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12.5 7l-5 5 5 5"/><path d="M18 7l-5 5 5 5" opacity=".5"/></symbol>
+  <symbol id="i-faster" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11.5 7l5 5-5 5"/><path d="M6 7l5 5-5 5" opacity=".5"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-system" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><ellipse cx="12" cy="12" rx="9.5" ry="4" transform="rotate(-20 12 12)"/><circle cx="12" cy="12" r="2.4" style="fill:var(--ico-accent);stroke:none"/><circle cx="20.2" cy="8.6" r="1.4" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+  <symbol id="i-follow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="6.5"/><path d="M12 2.5v4M12 17.5v4M2.5 12h4M17.5 12h4"/><circle cx="12" cy="12" r="1.8" style="fill:var(--ico-accent);stroke:none"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 7h15"/><path d="M9.5 7V4.8h5V7"/><path d="M6.5 7l.9 12.2a1.5 1.5 0 0 0 1.5 1.3h6.2a1.5 1.5 0 0 0 1.5-1.3L17.5 7"/><path d="M10.2 11v5.5M13.8 11v5.5"/></symbol>
+  <symbol id="i-pass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-fail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 7l10 10M17 7L7 17"/></symbol>
+
+  <!-- Planets -->
+  <symbol id="o-rocky" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+    <circle cx="12" cy="12" r="8"/>
+    <circle cx="9.5" cy="10" r="1.7" style="stroke:var(--ico-accent)"/><circle cx="14.6" cy="14.6" r="2.1" style="stroke:var(--ico-accent)"/><circle cx="14.4" cy="8.3" r=".8" style="fill:var(--ico-accent);stroke:none"/>
+  </symbol>
+  <symbol id="o-ocean" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+    <circle cx="12" cy="12" r="8"/>
+    <path d="M5.5 11c1.3-1 2.7-1 4 0s2.7 1 4 0 2.7-1 4 0" style="stroke:var(--ico-accent)"/>
+    <path d="M6.8 14.6c1.2-.9 2.4-.9 3.6 0s2.4.9 3.6 0 2.4-.9 3.2-.2" style="stroke:var(--ico-accent)"/>
+  </symbol>
+  <symbol id="o-ice" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="8"/>
+    <path d="M6.3 6.4Q12 9.2 17.7 6.4" style="stroke:var(--ico-accent)"/><path d="M6.3 17.6Q12 14.8 17.7 17.6" style="stroke:var(--ico-accent)"/>
+    <path d="M8.5 11.2l2.4 1.4 2-1.6 2.6 1.1"/>
+  </symbol>
+  <symbol id="o-gas" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+    <circle cx="12" cy="12" r="9"/>
+    <path d="M3.6 9.5h16.8"/><path d="M3.2 12.8h17.6"/><path d="M4.6 16.4h14.8"/>
+    <ellipse cx="15" cy="14.6" rx="2" ry=".9" style="fill:var(--ico-accent);stroke:none"/>
+  </symbol>
+  <symbol id="o-icegiant" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+    <circle cx="12" cy="12" r="7"/>
+    <ellipse cx="12" cy="12" rx="2.6" ry="10.6" transform="rotate(18 12 12)" style="stroke:var(--ico-accent)"/>
+  </symbol>
+  <!-- Small bodies -->
+  <symbol id="o-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
+    <path d="M15.5 4.6a8 8 0 1 0 3.9 12.2 6.6 6.6 0 0 1-3.9-12.2z"/>
+    <circle cx="8.6" cy="12.8" r="1.3" style="stroke:var(--ico-accent)"/><circle cx="11.6" cy="16.6" r=".8" style="fill:var(--ico-accent);stroke:none"/>
+  </symbol>
+  <symbol id="o-asteroid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round">
+    <path d="M5.5 9.5l4-4.5 6.2 1.1 3.6 5-1.3 6.1-5 3.3-5.6-1.4L4.8 14z"/>
+    <circle cx="10.8" cy="10.6" r="1.6" style="stroke:var(--ico-accent)"/><circle cx="15" cy="15" r=".9" style="fill:var(--ico-accent);stroke:none"/>
+  </symbol>
+  <symbol id="o-comet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+    <path d="M14.4 9.6L4 20"/><path d="M16.3 10.4L9 20.6" opacity=".7"/><path d="M13.6 7.7L3.6 14.8" opacity=".7"/>
+    <circle cx="16.8" cy="7.2" r="2.8" style="fill:var(--ico-accent);stroke:none"/>
+  </symbol>
+  <symbol id="o-dwarf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+    <ellipse cx="12" cy="12" rx="10.2" ry="4.4" transform="rotate(-22 12 12)" stroke-dasharray="1.4 2.6" style="stroke:var(--ico-accent)"/>
+    <circle cx="12" cy="12" r="4.4"/>
+  </symbol>
+  <!-- Stars -->
+  <symbol id="o-reddwarf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+    <circle cx="12" cy="12" r="4"/>
+    <path d="M17 7l1.6-1.6M7 17l-1.6 1.6M17 17l1.6 1.6M7 7L5.4 5.4" style="stroke:var(--ico-accent)"/>
+  </symbol>
+  <symbol id="o-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+    <circle cx="12" cy="12" r="5"/>
+    <path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1" style="stroke:var(--ico-accent)"/>
+  </symbol>
+  <symbol id="o-bluegiant" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+    <circle cx="12" cy="12" r="7.5"/>
+    <circle cx="12" cy="12" r="3.4" style="stroke:var(--ico-accent)"/>
+    <path d="M12 1.6v1.6M12 20.8v1.6M1.6 12h1.6M20.8 12h1.6" style="stroke:var(--ico-accent)"/>
+  </symbol>
+  <symbol id="o-redgiant" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+    <circle cx="12" cy="12" r="9.6" stroke-dasharray="2.2 2.2"/>
+    <circle cx="12" cy="12" r="6.4" opacity=".6"/>
+    <circle cx="12" cy="12" r="2.6" style="fill:var(--ico-accent);stroke:none"/>
+  </symbol>
+  <!-- Remnants -->
+  <symbol id="o-whitedwarf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+    <circle cx="12" cy="12" r="9.4" stroke-dasharray=".2 2.8" stroke-linecap="round"/>
+    <circle cx="12" cy="12" r="5.6"/>
+    <circle cx="12" cy="12" r="2.2" style="fill:var(--ico-accent);stroke:none"/>
+  </symbol>
+  <symbol id="o-neutron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+    <circle cx="12" cy="12" r="5"/>
+    <path d="M15.2 8.8L20 4M8.8 15.2L4 20" style="stroke:var(--ico-accent)"/>
+    <path d="M16.6 9.6l3.8.2M7.4 14.4l-3.8-.2" style="stroke:var(--ico-accent)" opacity=".6"/>
+    <circle cx="12" cy="12" r="1.8" fill="currentColor" stroke="none"/>
+  </symbol>
+  <symbol id="o-pulsar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 2.2v5.6M12 16.2v5.6" style="stroke:var(--ico-accent)"/>
+    <path d="M17.8 8.4a6.8 6.8 0 0 1 0 7.2"/><path d="M16.2 14.2l1.6 1.4 .5-2"/>
+    <path d="M6.2 15.6a6.8 6.8 0 0 1 0-7.2"/><path d="M7.8 9.8L6.2 8.4l-.5 2"/>
+    <circle cx="12" cy="12" r="2.2" style="fill:var(--ico-accent);stroke:none"/>
+  </symbol>
+  <symbol id="o-blackhole" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+    <ellipse cx="12" cy="12" rx="10.4" ry="3.2" transform="rotate(-16 12 12)" style="stroke:var(--ico-accent)"/>
+    <circle cx="12" cy="12" r="4.6"/>
+    <circle cx="12" cy="12" r="2.4" fill="currentColor" stroke="none" opacity=".35"/>
+  </symbol>
+</svg>
+
+<div class="world" id="world"><div class="peek" id="peek" aria-hidden="true"></div></div>
+
+<div class="hud">
+  <header class="panel brand">
+    <svg class="logo" aria-hidden="true"><use href="#i-logo"/></svg>
+    <span class="label">Orbital</span>
+    <button class="icon-btn" id="menuBtn" aria-label="Open pause menu" title="Menu"><svg class="ico"><use href="#i-menu"/></svg></button>
+  </header>
+
+  <section class="panel timebar" aria-label="Time">
+    <button class="icon-btn solid" id="playPause" aria-label="Pause" title="Pause (Space)"><svg class="ico"><use href="#i-pause"/></svg></button>
+    <button class="icon-btn" id="slower" aria-label="Half speed" title="Half speed ( [ )"><svg class="ico"><use href="#i-slower"/></svg></button>
+    <label class="speed">
+      <input id="speed" type="range" min="0" max="1000" step="1" aria-label="Time warp">
+      <span class="ticks" aria-hidden="true"><span>1s</span><span>1h</span><span>1d</span><span>1y</span><span>10y</span></span>
+    </label>
+    <button class="icon-btn" id="faster" aria-label="Double speed" title="Double speed ( ] )"><svg class="ico"><use href="#i-faster"/></svg></button>
+    <div class="readout-wrap"><output class="readout num" id="speedOut">1.0 day/s</output><span class="limited label" id="limited" hidden title="The simulation can't keep up with this time warp; it's running as fast as it can.">Limited</span></div>
+    <div class="vr"></div>
+    <button class="preset-btn" id="presetBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="presetMenu">
+      <svg class="ico sm"><use href="#i-system"/></svg><span class="label">Presets</span><svg class="chev"><use href="#i-chev"/></svg>
+    </button>
+    <div class="menu" id="presetMenu" role="menu" hidden></div>
+  </section>
+
+  <section class="panel stats" aria-label="Stats">
+    <div class="stat"><span class="label dim">Bodies</span><span class="v num" id="statBodies">0</span></div>
+    <div class="stat"><span class="label dim">Debris</span><span class="v num" id="statDebris">0</span></div>
+    <div class="stat"><span class="label dim">Date</span><span class="v num" id="statDate">—</span></div>
+    <div class="stat"><span class="label dim">FPS</span><span class="v num" id="statFps">60</span></div>
+  </section>
+
+  <div class="main">
+    <div class="pause-banner label" id="pauseBanner" hidden><svg class="ico sm"><use href="#i-pause"/></svg>Paused</div>
+    <div class="notice" id="notice" role="status" aria-live="polite" hidden></div>
+  </div>
+
+  <aside class="panel picker" aria-label="Objects">
+    <div class="picker-head">
+      <div class="tabs" role="tablist" aria-label="Object categories">
+        <button class="tab label" role="tab" aria-selected="true" data-tab="planets">Planets</button>
+        <button class="tab label" role="tab" aria-selected="false" data-tab="small">Small</button>
+        <button class="tab label" role="tab" aria-selected="false" data-tab="stars">Stars</button>
+        <button class="tab label" role="tab" aria-selected="false" data-tab="remnants">Remnants</button>
+      </div>
+    </div>
+    <div class="obj-list" id="objList" role="tabpanel"></div>
+    <div class="spawn" id="spawn" hidden>
+      <label class="label dim" for="spawnMass">Mass</label>
+      <div class="mass-field"><input id="spawnMass" class="num" inputmode="decimal" autocomplete="off" value="1"><span id="spawnUnit">M⊕</span></div>
+      <p>Tap to place in orbit · drag to launch</p>
+    </div>
+  </aside>
+
+  <nav class="panel toolbar" aria-label="Tools">
+    <div class="hint" id="hint"></div>
+    <div class="tools">
+      <div class="tool-group" role="group" aria-label="Handle">
+        <button class="tool" data-tool="select" aria-label="Select"><kbd>1</kbd><svg class="ico"><use href="#i-select"/></svg></button>
+        <button class="tool" data-tool="grab" aria-label="Grab"><kbd>2</kbd><svg class="ico"><use href="#i-grab"/></svg></button>
+        <button class="tool" data-tool="erase" aria-label="Erase"><kbd>3</kbd><svg class="ico"><use href="#i-erase"/></svg></button>
+      </div>
+      <div class="vr"></div>
+      <div class="tool-group" role="group" aria-label="Force">
+        <button class="tool" data-tool="attract" aria-label="Attract"><kbd>4</kbd><svg class="ico"><use href="#i-attract"/></svg></button>
+        <button class="tool" data-tool="orbitlock" aria-label="Orbit lock"><kbd>5</kbd><svg class="ico"><use href="#i-orbitlock"/></svg></button>
+      </div>
+      <div class="vr"></div>
+      <div class="tool-group destroy" role="group" aria-label="Destroy">
+        <button class="tool" data-tool="laser" aria-label="Laser"><kbd>6</kbd><svg class="ico"><use href="#i-laser"/></svg></button>
+        <button class="tool" data-tool="collapse" aria-label="Collapse"><kbd>7</kbd><svg class="ico"><use href="#i-collapse"/></svg></button>
+        <button class="tool" data-tool="explode" aria-label="Explode"><kbd>8</kbd><svg class="ico"><use href="#i-explode"/></svg></button>
+      </div>
+      <div class="vr"></div>
+      <div class="tool-group" role="group" aria-label="Utility">
+        <button class="tool util" id="undoBtn" aria-label="Undo" title="Undo (two-finger tap)"><svg class="ico"><use href="#i-undo"/></svg></button>
+        <button class="tool util" id="pencilBtn" aria-label="Pencil mode" aria-pressed="false" title="Pencil mode: Pencil uses tools, finger moves camera" hidden><svg class="ico"><use href="#i-pencil"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+  <aside class="panel info" id="info" aria-label="Selected body" aria-hidden="true">
+    <div class="info-head">
+      <svg class="type-ico" aria-hidden="true"><use id="infoIcon" href="#o-rocky"/></svg>
+      <div>
+        <input class="info-name" id="infoName" aria-label="Body name" autocomplete="off" spellcheck="false">
+        <span class="chip label" id="infoType"></span>
+        <div class="info-sub" id="infoSub"></div>
+      </div>
+      <button class="icon-btn" id="infoClose" aria-label="Close panel" title="Close (Esc)"><svg class="ico"><use href="#i-close"/></svg></button>
+    </div>
+    <div class="info-body">
+      <section class="sec"><span class="label dim">Physical</span><dl class="kv" id="kvPhys"></dl></section>
+      <section class="sec" id="secOrbit">
+        <span class="label dim">Orbit</span>
+        <div class="orbit-row">
+          <svg class="orbit-mini" viewBox="-52 -52 104 104" aria-label="Orbit shape">
+            <ellipse id="miniOrbit" rx="40" ry="40" fill="none" stroke="#7C8BA1" stroke-dasharray="2 3"/>
+            <circle r="3.5" fill="#E2E8F0"/>
+            <circle id="miniBody" r="3" fill="#00F0FF"/>
+          </svg>
+          <dl class="kv" id="kvOrbit"></dl>
+        </div>
+      </section>
+      <section class="sec" id="secComp">
+        <div class="sec-head"><span class="label dim">Composition</span><span class="num sec-note" id="infoTemp"></span></div>
+        <div class="comp-bar" id="compBar"></div>
+        <div class="legend" id="compLegend"></div>
+        <canvas class="surface" id="surface" width="256" height="128" aria-label="Surface map"></canvas>
+      </section>
+      <section class="sec" id="secLife">
+        <div class="sec-head"><span class="label dim">Life likelihood</span><span class="score num" id="lifeScore"></span></div>
+        <ul class="factors" id="factors"></ul>
+      </section>
+      <section class="sec">
+        <div class="mass-edit">
+          <label class="label dim" for="massScale">Mass</label>
+          <output class="num" id="massOut">×1.00</output>
+          <input id="massScale" type="range" min="-100" max="100" value="0">
+        </div>
+      </section>
+    </div>
+    <div class="actions">
+      <button class="act label" id="followBtn" aria-pressed="false"><svg class="ico sm"><use href="#i-follow"/></svg>Follow</button>
+      <button class="act label" id="actCollapse"><svg class="ico sm"><use href="#i-collapse"/></svg>Collapse</button>
+      <button class="act label" id="actExplode"><svg class="ico sm"><use href="#i-explode"/></svg>Explode</button>
+      <button class="act label danger" id="actDelete"><svg class="ico sm"><use href="#i-trash"/></svg>Delete</button>
+    </div>
+  </aside>
+</div>
+
+<div class="scrim" id="scrim" hidden>
+  <div class="panel sheet" role="dialog" aria-modal="true" aria-label="Menu">
+    <div class="view stack" data-view="main" hidden>
+      <div class="title-card">
+        <svg class="logo" aria-hidden="true"><use href="#i-logo"/></svg>
+        <span class="label">Orbital</span>
+        <p>True-scale gravity sandbox</p>
+      </div>
+      <button class="big-btn primary label" data-go="new">New sandbox</button>
+      <button class="big-btn label" data-go="load">Load</button>
+      <button class="big-btn label" data-go="presets">Presets</button>
+      <button class="big-btn label" data-go="settings">Settings</button>
+    </div>
+    <div class="view stack" data-view="pause" hidden>
+      <div class="sheet-head"><span class="label">Paused</span><button class="icon-btn" data-go="close" aria-label="Resume"><svg class="ico"><use href="#i-close"/></svg></button></div>
+      <button class="big-btn primary label" data-go="close">Resume</button>
+      <button class="big-btn label" data-go="save">Save</button>
+      <button class="big-btn label" data-go="load">Load</button>
+      <button class="big-btn label" data-go="settings">Settings</button>
+      <button class="big-btn danger label" data-go="main">Quit to menu</button>
+    </div>
+    <div class="view stack" data-view="slots" hidden>
+      <div class="sheet-head"><span class="label" id="slotsTitle">Load</span><button class="icon-btn" data-go="back" aria-label="Back"><svg class="ico"><use href="#i-close"/></svg></button></div>
+      <div class="stack" id="slotList"></div>
+    </div>
+    <div class="view stack" data-view="settings" hidden>
+      <div class="sheet-head"><span class="label">Settings</span><button class="icon-btn" data-go="back" aria-label="Back"><svg class="ico"><use href="#i-close"/></svg></button></div>
+      <div class="setting"><span>Units<small>Display only</small></span>
+        <div class="seg" role="radiogroup" aria-label="Units" data-setting="units"><button role="radio" data-value="astro">Astro</button><button role="radio" data-value="si">SI</button></div></div>
+      <div class="setting"><span>Minimum body size<small>Keep bodies a few pixels wide</small></span><button class="switch" role="switch" data-setting="minSize" aria-label="Minimum body size"></button></div>
+      <div class="setting"><span>Pencil mode<small>Pencil = tool, finger = camera</small></span><button class="switch" role="switch" data-setting="pencil" aria-label="Pencil mode"></button></div>
+      <div class="setting"><span>Graphics</span>
+        <div class="seg" role="radiogroup" aria-label="Graphics quality" data-setting="quality"><button role="radio" data-value="low">Low</button><button role="radio" data-value="med">Med</button><button role="radio" data-value="high">High</button></div></div>
+      <div class="setting"><span>Trails</span><button class="switch" role="switch" data-setting="trails" aria-label="Trails"></button></div>
+      <div class="setting"><span>UI sounds</span><button class="switch" role="switch" data-setting="sounds" aria-label="UI sounds"></button></div>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>
