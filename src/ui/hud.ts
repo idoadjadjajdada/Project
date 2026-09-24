@@ -247,6 +247,11 @@ export class Hud {
     f.classList.toggle("bad", this.fps < 30);
     $("#limited").hidden = !(this.sim.limited && !this.state.paused);
 
+    // Keep the hover card current while the pointer rests (a collapse changes the type under it).
+    if (this.peekAt && performance.now() - this.lastInfoUpdate > 200) {
+      const b = this.sim.byId.get(this.peekAt.id);
+      this.peek(b ?? null, this.peekAt.sx, this.peekAt.sy);
+    }
     if (this.infoOpenFor !== null) {
       if (!this.sim.byId.has(this.infoOpenFor)) this.closeInfo();
       else if (performance.now() - this.lastInfoUpdate > 200) this.fillInfo(this.sim.byId.get(this.infoOpenFor)!, false);
@@ -263,9 +268,12 @@ export class Hud {
 
   // ---------- Hover preview ----------
 
+  private peekAt: { id: number; sx: number; sy: number } | null = null;
+
   peek(b: Body | null, sx = 0, sy = 0): void {
     const p = $("#peek");
-    if (!b) { p.classList.remove("show"); return; }
+    if (!b) { p.classList.remove("show"); this.peekAt = null; return; }
+    this.peekAt = { id: b.id, sx, sy };
     const parent = parentOf(this.sim.bodies, b);
     const [mv, mu] = fmt.mass(b.m);
     const dist = parent ? fmt.length(Math.hypot(b.x - parent.x, b.y - parent.y)) : null;
@@ -317,9 +325,11 @@ export class Hud {
     const b = this.sim.byId.get(id);
     if (!b) return;
     if (this.infoOpenFor !== id) {
+      // Only release the camera if the Follow button was holding it on the previous body;
+      // a follow set by a preset (or none at all) is left alone.
+      if (this.state.follow) this.act.follow(null);
       this.state.follow = false;
       $("#followBtn").setAttribute("aria-pressed", "false");
-      this.act.follow(null);
       sfx.open();
     }
     this.infoOpenFor = id;
