@@ -15,6 +15,21 @@ const ERASE_BRUSH = 32;      // px
 const ATTRACT_BRUSH = 90;    // px
 const LASER_ARM = 12;        // px of swipe before the laser fires
 
+/** Safari's trackpad pinch event (not in the DOM typings). */
+interface GestureEvent extends UIEvent { scale: number; clientX: number; clientY: number }
+
+/**
+ * Trackpad scroll vs mouse wheel. Chrome and Safari still report the legacy `wheelDeltaY`,
+ * which is -3× the pixel delta for trackpads and a multiple of 120 for wheel notches;
+ * any sideways movement also gives the trackpad away.
+ */
+function isTrackpadScroll(e: WheelEvent): boolean {
+  if (e.deltaMode !== 0) return false;
+  if (e.deltaX !== 0) return true; // mouse wheels only scroll vertically
+  const legacy = (e as WheelEvent & { wheelDeltaY?: number }).wheelDeltaY;
+  return !!legacy && Math.abs(legacy) % 120 !== 0 && Math.abs(legacy + 3 * e.deltaY) < 1;
+}
+
 interface Ptr {
   id: number;
   type: string;
@@ -37,6 +52,7 @@ type Stroke =
 /**
  * Turns pointer input into tool actions and camera moves.
  * Mouse: left = tool, right/middle drag = pan, wheel = zoom.
+ * Mac trackpad: two-finger scroll = pan, pinch = zoom.
  * Touch: one finger = tool, two fingers = pan/pinch, two-finger tap = undo, long-press = info.
  * Pencil mode: the Pencil always uses the tool; fingers always move the camera.
  */
@@ -62,9 +78,24 @@ export class InputController {
     el.addEventListener("wheel", e => {
       e.preventDefault();
       const [x, y] = this.local(e);
+      // Trackpad pinch arrives as a ctrl+wheel with small deltas (Chrome, Firefox, Edge).
+      if (e.ctrlKey) { this.cam.zoomAt(x, y, Math.exp(-e.deltaY * 0.01)); return; }
+      // Two-finger trackpad scroll pans; a mouse wheel zooms.
+      if (isTrackpadScroll(e)) { this.cam.panPx(-e.deltaX, -e.deltaY); return; }
       const k = Math.exp(-e.deltaY * (e.deltaMode === 1 ? 0.05 : 0.0015));
       this.cam.zoomAt(x, y, k);
     }, { passive: false });
+    // Safari sends trackpad pinches as gesture events and would zoom the whole page.
+    let gScale = 1;
+    el.addEventListener("gesturestart", e => { e.preventDefault(); gScale = (e as GestureEvent).scale || 1; });
+    el.addEventListener("gesturechange", e => {
+      e.preventDefault();
+      const g = e as GestureEvent, s = g.scale || 1;
+      const [x, y] = this.local(g);
+      this.cam.zoomAt(x, y, s / gScale);
+      gScale = s;
+    });
+    el.addEventListener("gestureend", e => e.preventDefault());
     hud.onToolChange = () => this.refreshCursor();
     this.refreshCursor();
   }

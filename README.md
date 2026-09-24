@@ -5,12 +5,23 @@ The design and scope live in the PRD ("Space Sandbox PRD" doc).
 
 ## Run
 
+Needs Node 20.19+ or 22.12+ (Vite 7). Works on macOS, Windows and Linux.
+
 ```sh
 npm install
-npm run dev        # http://localhost:5173
+npm start          # dev server, opens http://localhost:5173
 npm test           # physics tests
 npm run build      # typecheck + production build in dist/
+npm run preview    # serve dist/ (opening index.html from disk won't work: the physics worker needs http)
 ```
+
+### On a Mac
+
+1. Install Node: `brew install node@22` (or the LTS installer from nodejs.org). Check with `node -v`.
+2. In Terminal, from this folder: `npm install`, then `npm start`. Safari, Chrome and Firefox all work.
+3. Trackpad: two-finger scroll pans, pinch zooms, two-finger click-drag also pans. Cmd+Z undoes.
+
+To play on an iPad on the same Wi-Fi, run `npm run dev -- --host` and open the Network URL it prints.
 
 ## How it's put together
 
